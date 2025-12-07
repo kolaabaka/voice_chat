@@ -1,0 +1,8 @@
+.PHONY: build
+
+build:
+	rsrc -arch amd64 -ico icon.ico
+	go build -ldflags="-H windowsgui" -o app.exe ./cmd/main.go 
+
+clean:
+	rm -f app.exe resource.syso
