@@ -1,9 +1,14 @@
 package app
 
 import (
+	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"net"
 )
+
+var idByte []byte = make([]byte, 4)
+var textMessageByte []byte = make([]byte, 1028)
 
 type InitMessage struct {
 	UserID string `json:"userId"`
@@ -17,10 +22,28 @@ func App() {
 	}
 	defer conn.Close()
 
-	msg := InitMessage{UserID: "5596"}
+	var id uint32
+
+	fmt.Scan(&id)
+	msg := InitMessage{UserID: fmt.Sprint(id)}
+
+	binary.BigEndian.PutUint32(idByte, id)
+
 	data, _ := json.Marshal(msg)
 
 	conn.Write(data)
+
+	var inputMessage string
+
+	for {
+		fmt.Scan(&inputMessage)
+		//id + message byte
+		copy(textMessageByte[:4], idByte)
+		copy(textMessageByte[4:], []byte(inputMessage))
+
+		conn.Write(textMessageByte)
+
+	}
 
 	// portaudio.Initialize()
 	// defer portaudio.Terminate()

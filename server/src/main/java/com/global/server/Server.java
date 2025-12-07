@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 @Component
@@ -26,31 +27,42 @@ public class Server extends Thread {
     @Qualifier("userRpository")
     private UserRpository userRpository;
 
-    private static final byte[] MESSAGE_OK = new String("OK").getBytes();
+    public static final int ID_BYTE_COUNT = 4;
+    public static final int ID_PAYLOAD_COUNT = 1024;
+    public static final int TOTAL_MESSAGE_BYTE_COUNT = ID_PAYLOAD_COUNT + ID_BYTE_COUNT;
+    private static final byte[] MESSAGE_OK = "OK".getBytes();
 
     @Override
     public void run() {
-        while (true) {
             try (ServerSocket serverSocket = new ServerSocket(8080)){
-                Socket socket = serverSocket.accept();
+                while (true) {
+                    Socket socket = serverSocket.accept();
 
-                InputStream inputStream = socket.getInputStream();
-                OutputStream outputStream = socket.getOutputStream();
-                byte[] initMessageArray = new byte[256];
-                inputStream.read(initMessageArray);
+                    InputStream inputStream = socket.getInputStream();
+                    OutputStream outputStream = socket.getOutputStream();
+                    byte[] initMessageArray = new byte[TOTAL_MESSAGE_BYTE_COUNT];
+                    inputStream.read(initMessageArray);
 
-                InitMessageEntity initMessage= parseInitMessageJson(initMessageArray);
+                    byte[] bu = new byte[ID_BYTE_COUNT];
 
-                System.out.println(initMessage);
-                outputStream.write(MESSAGE_OK);
-                outputStream.flush();
+                    System.arraycopy(initMessageArray, 0, bu, 0, ID_BYTE_COUNT);
 
-                userRpository.adduser(initMessage.getUserId(), inputStream, outputStream);
+                    ByteBuffer buffer = ByteBuffer.wrap(bu);
+                    buffer.getInt();
+
+                    InitMessageEntity initMessage = parseInitMessageJson(initMessageArray);
+
+                    System.out.println(initMessage);
+                    outputStream.write(MESSAGE_OK);
+                    outputStream.flush();
+
+                    userRpository.adduser(initMessage.getUserId(), inputStream, outputStream);
+                }
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }
+
     }
 
     private InitMessageEntity parseInitMessageJson(byte[] mes){

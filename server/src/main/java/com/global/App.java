@@ -1,6 +1,7 @@
 package com.global;
 
 import com.global.server.Server;
+import com.global.server.message.MessageHandler;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -13,5 +14,7 @@ public class App {
         ApplicationContext context = new AnnotationConfigApplicationContext(App.class);
         Server server = context.getBean(Server.class);
         server.start();
+        MessageHandler messageHandler = context.getBean(MessageHandler.class);
+        messageHandler.start();
     }
 }
