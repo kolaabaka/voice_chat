@@ -32,7 +32,8 @@ public class MessageHandler extends Thread{
                     int bytesRead = userSocket.getIn().read(messageArray);
 
                     System.out.println(parseUserId(messageArray, bytesRead));
-                    System.out.println(parseMessage(messageArray, bytesRead));
+                    System.out.println(parseMessageSize(messageArray, bytesRead));
+                    System.out.println(parseMessage(messageArray, parseMessageSize(messageArray, bytesRead)));
                 }
             }
         }
@@ -45,9 +46,16 @@ public class MessageHandler extends Thread{
         return buffer.getInt();
     }
 
+    private int parseMessageSize(byte[] messageByteArray, int countBytes){
+        byte[] messageSize = new byte[ID_BYTE_MESSAGE_COUNT];
+        System.arraycopy(messageByteArray, 4, messageSize, 0, ID_BYTE_MESSAGE_COUNT);
+        ByteBuffer buffer = ByteBuffer.wrap(messageSize);
+        return buffer.getInt();
+    }
+
     private String parseMessage(byte[] messageByteArray, int countBytes){
         byte[] messageByte = new byte[countBytes];
-        System.arraycopy(messageByteArray, ID_BYTE_COUNT, messageByte, 0, countBytes - ID_BYTE_COUNT);
+        System.arraycopy(messageByteArray, ID_BYTE_COUNT + ID_BYTE_MESSAGE_COUNT, messageByte, 0, countBytes);
         return new String(messageByte, StandardCharsets.UTF_8);
     }
 }

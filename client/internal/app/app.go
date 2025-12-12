@@ -1,14 +1,18 @@
 package app
 
 import (
+	"audio-chat/client/internal/wrapper"
+	"bufio"
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"net"
+	"os"
 )
 
 var idByte []byte = make([]byte, 4)
 var textMessageByte []byte = make([]byte, 1028)
+var id uint32
 
 type InitMessage struct {
 	UserID string `json:"userId"`
@@ -22,8 +26,6 @@ func App() {
 	}
 	defer conn.Close()
 
-	var id uint32
-
 	fmt.Scan(&id)
 	msg := InitMessage{UserID: fmt.Sprint(id)}
 
@@ -33,13 +35,12 @@ func App() {
 
 	conn.Write(data)
 
-	var inputMessage string
-
 	for {
-		fmt.Scan(&inputMessage)
-		//id + message byte
-		copy(textMessageByte[:4], idByte)
-		copy(textMessageByte[4:], []byte(inputMessage))
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Enter text: ")
+		inputMessage, _ := reader.ReadString('\n')
+
+		copy(textMessageByte, wrapper.WrapMessageToByteSlice(inputMessage, idByte))
 
 		conn.Write(textMessageByte)
 
