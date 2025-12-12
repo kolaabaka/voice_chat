@@ -28,6 +28,7 @@ public class Server extends Thread {
     private UserRpository userRpository;
 
     public static final int ID_BYTE_COUNT = 4;
+    public static final int ID_BYTE_MESSAGE_COUNT = 4;
     public static final int ID_PAYLOAD_COUNT = 1024;
     public static final int TOTAL_MESSAGE_BYTE_COUNT = ID_PAYLOAD_COUNT + ID_BYTE_COUNT;
     private static final byte[] MESSAGE_OK = "OK".getBytes();
